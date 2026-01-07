@@ -20,7 +20,12 @@ export function ThemedCardView({
     { light: lightColor, dark: darkColor },
     "cardBorder"
   );
-  const borderWidth = theme === 'dark' ? 1 : 0
+  const borderWidth = theme === "dark" ? 1 : 0;
 
-  return <View style={[{ backgroundColor, borderColor, borderWidth }, style]} {...otherProps} />;
+  return (
+    <View
+      style={[{ backgroundColor, borderColor, borderWidth }, style]}
+      {...otherProps}
+    />
+  );
 }

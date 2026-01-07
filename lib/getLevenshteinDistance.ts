@@ -1,4 +1,4 @@
-export const getLevenshteinDistance = (s: string, t:string) => {
+export const getLevenshteinDistance = (s: string, t: string) => {
   if (!s.length) return t.length;
   if (!t.length) return s.length;
   const arr = [];

@@ -52,6 +52,7 @@ export default function CreateItemScreen() {
               TITLE
             </ThemedText>
             <ThemedTextInput
+              style={styles.input}
               placeholder="e.g., Belvedere Museum"
               value={title}
               onChangeText={setTitle}
@@ -67,7 +68,7 @@ export default function CreateItemScreen() {
             </ThemedText>
             <ThemedTextInput
               ref={descriptionRef}
-              style={styles.textArea}
+              style={[styles.textArea, styles.input]}
               placeholder="e.g., Takes 5 hours to visit..."
               value={description}
               onChangeText={setDescription}
@@ -124,7 +125,6 @@ const styles = StyleSheet.create({
   },
   textArea: {
     height: 150,
-    paddingTop: 16,
   },
   saveButton: {
     backgroundColor: "#007AFF",

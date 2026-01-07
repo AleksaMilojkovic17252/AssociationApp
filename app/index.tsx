@@ -1,10 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   FlatList,
   Pressable,
   StyleSheet,
-  TextInput, // Swapped for ripple support
-  useColorScheme,
+  useColorScheme
 } from "react-native";
 
 import { Ionicons } from "@expo/vector-icons";
@@ -12,12 +11,17 @@ import { useRouter } from "expo-router";
 
 import DataCard from "@/components/DataCard";
 import { useAssociationStore } from "@/lib/dataStore";
-import { getLevenshteinDistance } from "@/lib/getLevenshteinDistance";
 import { DataType } from "@/model/dataType";
 
-// Custom Themed Components
 import { ThemedCardView } from "@/components/themed-components/themed-card-view";
 import { ThemedSafeAreaView } from "@/components/themed-components/themed-safe-area-view";
+import { ThemedTextInput } from "@/components/themed-components/themed-text-input";
+import Fuse from "fuse.js";
+
+const options = {
+  keys: ["title"],
+  threshold: 0.3,
+};
 
 export default function ListScreen() {
   const [search, setSearch] = useState("");
@@ -25,61 +29,71 @@ export default function ListScreen() {
   const router = useRouter();
   const theme = useColorScheme();
   const isDark = theme === "dark";
-  
+
   const { items, selectItem } = useAssociationStore();
+
+  const fuse = useMemo(() => new Fuse(items, options), [items]);
 
   useEffect(() => {
     if (search.trim() === "") {
       setFilteredData(items);
       return;
     }
+    const searchResults = fuse.search(search);
+    setFilteredData(searchResults.map((result) => result.item));
+  }, [search, fuse, setFilteredData, items]);
 
-    const query = search.toLowerCase();
-    const threshold = 3;
+  // useEffect(() => {
+  //   if (search.trim() === "") {
+  //     setFilteredData(items);
+  //     return;
+  //   }
 
-    const newData = items.filter((item) => {
-      const title = item.title.toLowerCase();
-      if (title.includes(query)) return true;
+  //   const query = search.toLowerCase();
+  //   const threshold = 3;
 
-      const words = title.split(" ");
-      return words.some((word) => {
-        const distance = getLevenshteinDistance(query, word);
-        return distance <= threshold;
-      });
-    });
+  //   const newData = items.filter((item) => {
+  //     const title = item.title.toLowerCase();
+  //     if (title.includes(query)) return true;
 
-    newData.sort((a, b) => {
-      const distA = getLevenshteinDistance(query, a.title.toLowerCase());
-      const distB = getLevenshteinDistance(query, b.title.toLowerCase());
-      return distA - distB;
-    });
+  //     const words = title.split(" ");
+  //     return words.some((word) => {
+  //       const distance = getLevenshteinDistance(query, word);
+  //       return distance <= threshold;
+  //     });
+  //   });
 
-    setFilteredData(newData);
-  }, [search, items]);
+  //   newData.sort((a, b) => {
+  //     const distA = getLevenshteinDistance(query, a.title.toLowerCase());
+  //     const distB = getLevenshteinDistance(query, b.title.toLowerCase());
+  //     return distA - distB;
+  //   });
+
+  //   setFilteredData(newData);
+  // }, [search, items]);
 
   return (
     <ThemedSafeAreaView style={styles.container}>
-      <ThemedCardView 
-        style={
-          styles.searchContainer
-        }
-      >
+      <ThemedCardView style={styles.searchContainer}>
         <Ionicons
           name="search"
           size={20}
           color={isDark ? "#8E8E93" : "#888"}
           style={styles.searchIcon}
         />
-        <TextInput
+        <ThemedTextInput
           style={[styles.searchInput]}
           placeholder="Search museums..."
-          placeholderTextColor={isDark ? "#636366" : "#888"}
           value={search}
           onChangeText={setSearch}
         />
         {search.length > 0 && (
           <Pressable onPress={() => setSearch("")}>
-            <Ionicons name="close-circle" size={18} color={isDark ? "#636366" : "#CCC"} />
+            <Ionicons
+              name="close-circle"
+              size={18}
+              color={isDark ? "#636366" : "#CCC"}
+            />
           </Pressable>
         )}
       </ThemedCardView>
@@ -101,7 +115,7 @@ export default function ListScreen() {
       <Pressable
         style={({ pressed }) => [
           styles.fab,
-          pressed && { opacity: 0.8, transform: [{ scale: 0.95 }] }
+          pressed && { opacity: 0.8, transform: [{ scale: 0.95 }] },
         ]}
         android_ripple={{ color: "#ffffff44", borderless: true }}
         onPress={() => router.navigate("/create")}
@@ -135,6 +149,7 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 16,
+    borderWidth: 0,
   },
   fab: {
     position: "absolute",

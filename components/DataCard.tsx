@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Pressable, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, useColorScheme, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-components/themed-text";
 import { DataType } from "@/model/dataType";
@@ -9,6 +9,10 @@ export default function DataCard(props: {
   item: DataType;
   onPress: () => void;
 }) {
+  const colorScheme = useColorScheme();
+  const theme = colorScheme ?? "light";
+  const isDark = theme == "dark";
+
   return (
     <ThemedCardView style={styles.itemWrapper}>
       <Pressable
@@ -35,7 +39,7 @@ export default function DataCard(props: {
             {props.item.description}
           </ThemedText>
         </View>
-        <Ionicons name="chevron-forward" size={18} />
+        <Ionicons name="chevron-forward" size={18} color={isDark ? "#C7C7CC" : "#000000"} />
       </Pressable>
     </ThemedCardView>
   );
@@ -45,9 +49,8 @@ const styles = StyleSheet.create({
   itemWrapper: {
     marginHorizontal: 16,
     marginBottom: 12,
-    borderRadius: 14, // Slightly rounder for a more modern feel
+    borderRadius: 14,
     overflow: "hidden",
-    // Shadows for Light Mode
     elevation: 2,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },

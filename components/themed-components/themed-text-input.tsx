@@ -1,8 +1,7 @@
 import {
-    StyleSheet,
-    TextInput,
-    TextInputProps,
-    useColorScheme,
+  TextInput,
+  TextInputProps,
+  useColorScheme
 } from "react-native";
 
 import { useThemeColor } from "@/hooks/use-theme-color";
@@ -35,7 +34,6 @@ export const ThemedTextInput = forwardRef<TextInput, ThemedTextInputProps>(
 
     const inputStyle = [
       { backgroundColor, color, borderColor, borderWidth },
-      styles.input,
       style,
     ];
 
@@ -49,11 +47,3 @@ export const ThemedTextInput = forwardRef<TextInput, ThemedTextInputProps>(
     );
   }
 );
-
-const styles = StyleSheet.create({
-  input: {
-    fontSize: 16,
-    padding: 16,
-    borderRadius: 14,
-  },
-});

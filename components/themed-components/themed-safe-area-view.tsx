@@ -1,20 +1,29 @@
-import { Colors } from "@/constants/theme";
-import { useColorScheme } from "react-native";
+import { useThemeColor } from "@/hooks/use-theme-color";
 import {
   SafeAreaView,
   SafeAreaViewProps,
 } from "react-native-safe-area-context";
 
-export function ThemedSafeAreaView(props: SafeAreaViewProps) {
-  const theme = useColorScheme() ?? "light";
-  const { style, ...otherProps } = props;
+export type ThemedSafeAreaViewProps = SafeAreaViewProps & {
+  lightColor?: string;
+  darkColor?: string;
+};
 
-  const backgroundColor = Colors[theme].background;
+export function ThemedSafeAreaView({
+  style,
+  lightColor,
+  darkColor,
+  ...otherProps
+}: ThemedSafeAreaViewProps) {
+  const backgroundColor = useThemeColor(
+    { light: lightColor, dark: darkColor },
+    "background"
+  );
 
   return (
-      <SafeAreaView
-        style={[{ flex: 1, backgroundColor }, style]}
-        {...otherProps}
-      />
+    <SafeAreaView
+      style={[{ flex: 1, backgroundColor }, style]}
+      {...otherProps}
+    />
   );
 }

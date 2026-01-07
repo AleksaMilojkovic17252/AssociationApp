@@ -6,26 +6,35 @@ import {
 import { useEffect } from "react";
 
 import { Stack } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import * as SystemUI from "expo-system-ui";
 
+import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useAssociationStore } from "@/lib/dataStore";
 
-
 export default function RootLayout() {
-  const { loadItems } = useAssociationStore();
   const colorScheme = useColorScheme();
+  const theme = colorScheme ?? "light";
+
+  const { loadItems } = useAssociationStore();
 
   useEffect(() => {
     loadItems();
   }, []);
 
+  useEffect(() => {
+    SystemUI.setBackgroundColorAsync(Colors[theme].background);
+  }, [theme]);
+
   return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="index" options={{ headerShown: false }} />
-        <Stack.Screen name="item" options={{ headerShown: false }} />
-        <Stack.Screen name="create" options={{ headerShown: false }} />
+    <ThemeProvider value={theme === "dark" ? DarkTheme : DefaultTheme}>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="index" />
+        <Stack.Screen name="item" />
+        <Stack.Screen name="create" />
       </Stack>
+      <StatusBar style="auto" />
     </ThemeProvider>
   );
 }

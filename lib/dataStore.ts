@@ -1,8 +1,6 @@
-import { File, Paths } from "expo-file-system";
-
-import { create } from "zustand";
-
 import { DataType } from "@/model/dataType";
+import { File, Paths } from "expo-file-system";
+import { create } from "zustand";
 
 export interface DataState {
   file: File;
@@ -14,10 +12,15 @@ export interface DataState {
   removeItem: (item: DataType) => void;
 }
 
+const escapeData = (text: string) => text.replace(/:/g, "/:");
+
+const unescapeData = (text: string) => text.replace(/\/:/g, ":");
+
 export const useAssociationStore = create<DataState>((set, get) => ({
   items: [],
   file: new File(Paths.document, "association_data.txt"),
   selectedItem: undefined,
+
   loadItems: () => {
     const file = get().file;
     if (!file.exists) return;
@@ -25,60 +28,66 @@ export const useAssociationStore = create<DataState>((set, get) => ({
     const rawContent = file.textSync();
     const lines = rawContent.split("\n").filter((line) => line.trim() !== "");
 
-    const dataLines = lines.slice(2);
+    const dataLines = lines.slice(1);
 
     const items: DataType[] = dataLines
       .map((line) => {
-        const matches = [...line.matchAll(/"([^"]*)"/g)];
+        const parts = line.split(/(?<!\/):/);
 
-        if (matches.length >= 2) {
+        if (parts.length >= 2) {
           return {
-            title: matches[0][1],
-            description: matches[1][1],
+            title: unescapeData(parts[0].trim()),
+            description: unescapeData(parts[1].trim()),
           };
         }
         return null;
       })
-      .filter((item) => item !== null);
+      .filter((item): item is DataType => item !== null);
+
     set({ items });
   },
-  addItem: (newItem) => {
-    if (get().items.some((x) => x.title == newItem.title))
-      throw new Error("Can't have 2 items with the same title");
-    const file = get().file;
-    const cleanTitle = newItem.title.replace(/"/g, '""');
-    const cleanDescription = newItem.description.replace(/"/g, '""');
 
-    const newEntry = `"${cleanTitle}" : "${cleanDescription}"\n`;
+  addItem: (newItem) => {
+    if (get().items.some((x) => x.title === newItem.title))
+      throw new Error("Can't have 2 items with the same title");
+
+    const file = get().file;
+
+    const safeTitle = escapeData(newItem.title);
+    const safeDescription = escapeData(newItem.description);
+
+    const newEntry = `${safeTitle} : ${safeDescription}\n`;
 
     if (file.exists) {
       const current = file.textSync();
       file.write(current + newEntry);
     } else {
-      const header = "Version: 1\nTitle : Description\n";
+      const header = "1\n";
       file.write(header + newEntry);
     }
+
     set((state) => ({
-      items: [
-        ...state.items,
-        { ...newItem, id: state.items.length.toString() },
-      ],
+      items: [...state.items, newItem],
     }));
   },
+
   removeItem: (item) => {
     const updatedItems = get().items.filter(
       (data) => data.title !== item.title
     );
-    let newFileContent = "Version: 1\nTitle : Description : Location\n";
-    updatedItems.forEach((item) => {
-      newFileContent += `"${item.title}" : "${item.description}"\n`;
+
+    let newFileContent = "1\n";
+    updatedItems.forEach((it) => {
+      newFileContent += `${escapeData(it.title)} : ${escapeData(
+        it.description
+      )}\n`;
     });
+
     get().file.write(newFileContent);
     set({ items: updatedItems });
   },
+
   selectItem: (item) => {
-    set({
-      selectedItem: item,
-    });
+    set({ selectedItem: item });
   },
 }));
