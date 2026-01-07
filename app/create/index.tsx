@@ -5,20 +5,22 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Text,
   TextInput,
-  View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 
+import { ThemedSafeAreaView } from "@/components/themed-components/themed-safe-area-view";
+import { ThemedText } from "@/components/themed-components/themed-text";
+import { ThemedTextInput } from "@/components/themed-components/themed-text-input";
+import { ThemedView } from "@/components/themed-components/themed-view";
 import { useAssociationStore } from "@/lib/dataStore";
 
 export default function CreateItemScreen() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+
   const store = useAssociationStore();
   const router = useRouter();
 
@@ -40,30 +42,32 @@ export default function CreateItemScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <ThemedSafeAreaView style={styles.container}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={{ flex: 1 }}
       >
         <ScrollView contentContainerStyle={styles.scrollContent}>
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>TITLE</Text>
-            <TextInput
-              style={styles.input}
+          <ThemedView style={styles.inputGroup}>
+            <ThemedText style={styles.label} type="label">
+              TITLE
+            </ThemedText>
+            <ThemedTextInput
               placeholder="e.g., Belvedere Museum"
               value={title}
               onChangeText={setTitle}
               autoFocus={true}
               returnKeyType="next"
-              onSubmitEditing={() => descriptionRef.current!.focus()}
+              onSubmitEditing={() => descriptionRef.current?.focus()}
             />
-          </View>
+          </ThemedView>
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>DESCRIPTION</Text>
-            <TextInput
+          <ThemedView style={styles.inputGroup}>
+            <ThemedText style={styles.label} type="label">
+              DESCRIPTION
+            </ThemedText>
+            <ThemedTextInput
               ref={descriptionRef}
-              style={[styles.input, styles.textArea]}
+              style={styles.textArea}
               placeholder="e.g., Takes 5 hours to visit..."
               value={description}
               onChangeText={setDescription}
@@ -71,7 +75,7 @@ export default function CreateItemScreen() {
               numberOfLines={4}
               textAlignVertical="top"
             />
-          </View>
+          </ThemedView>
 
           <Pressable
             style={({ pressed }) => [
@@ -87,46 +91,40 @@ export default function CreateItemScreen() {
               color="white"
               style={{ marginRight: 8 }}
             />
-            <Text style={styles.saveButtonText}>Save Item</Text>
+            <ThemedText style={styles.saveButtonText}>Save Item</ThemedText>
           </Pressable>
 
           <Pressable style={styles.cancelButton} onPress={() => router.back()}>
-            <Text style={styles.cancelButtonText}>Cancel</Text>
+            <ThemedText style={styles.cancelButtonText}>Cancel</ThemedText>
           </Pressable>
         </ScrollView>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </ThemedSafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFF",
   },
   scrollContent: {
-    padding: 24,
+    padding: 12,
   },
   inputGroup: {
     marginBottom: 24,
   },
   label: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: "#8E8E93",
-    letterSpacing: 1,
     marginBottom: 8,
+    opacity: 0.7,
   },
   input: {
     fontSize: 16,
-    backgroundColor: "#F2F2F7",
     padding: 16,
-    borderRadius: 12,
-    color: "#000",
+    borderRadius: 14,
   },
   textArea: {
-    height: 120,
-    paddingTop: 16, // Better alignment for multiline
+    height: 150,
+    paddingTop: 16,
   },
   saveButton: {
     backgroundColor: "#007AFF",
@@ -136,24 +134,25 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginTop: 10,
-    elevation: 4,
     shadowColor: "#007AFF",
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.3,
     shadowRadius: 8,
+    elevation: 4,
   },
   saveButtonText: {
     color: "#FFF",
     fontSize: 18,
-    fontWeight: "600",
+    fontWeight: "700",
   },
   cancelButton: {
-    marginTop: 16,
+    marginTop: 20,
     alignItems: "center",
     padding: 10,
   },
   cancelButtonText: {
     color: "#8E8E93",
     fontSize: 16,
+    fontWeight: "500",
   },
 });

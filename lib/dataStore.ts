@@ -1,8 +1,8 @@
-import { DataType } from "@/model/dataType";
 import { File, Paths } from "expo-file-system";
+
 import { create } from "zustand";
 
-const SOH = "\u0001"; // SOH
+import { DataType } from "@/model/dataType";
 
 export interface DataState {
   file: File;
@@ -21,28 +21,42 @@ export const useAssociationStore = create<DataState>((set, get) => ({
   loadItems: () => {
     const file = get().file;
     if (!file.exists) return;
+
     const rawContent = file.textSync();
-    const parts = rawContent.split(SOH).filter((part) => part.trim() !== "");
-    const parsedItems = parts.map((block, index) => {
-      const [title, ...descLines] = block.trim().split("\n");
-      return {
-        title: title.trim(),
-        description: descLines.join("\n").trim(),
-      };
-    });
-    set({ items: parsedItems });
+    const lines = rawContent.split("\n").filter((line) => line.trim() !== "");
+
+    const dataLines = lines.slice(2);
+
+    const items: DataType[] = dataLines
+      .map((line) => {
+        const matches = [...line.matchAll(/"([^"]*)"/g)];
+
+        if (matches.length >= 2) {
+          return {
+            title: matches[0][1],
+            description: matches[1][1],
+          };
+        }
+        return null;
+      })
+      .filter((item) => item !== null);
+    set({ items });
   },
   addItem: (newItem) => {
     if (get().items.some((x) => x.title == newItem.title))
       throw new Error("Can't have 2 items with the same title");
     const file = get().file;
-    const newEntry = `${newItem.title}\n${newItem.description}\n${SOH}\n`;
+    const cleanTitle = newItem.title.replace(/"/g, '""');
+    const cleanDescription = newItem.description.replace(/"/g, '""');
+
+    const newEntry = `"${cleanTitle}" : "${cleanDescription}"\n`;
+
     if (file.exists) {
-      const currentContent = get().file.textSync();
-      file.write(currentContent + newEntry);
+      const current = file.textSync();
+      file.write(current + newEntry);
     } else {
-      file.create();
-      file.write(newEntry);
+      const header = "Version: 1\nTitle : Description\n";
+      file.write(header + newEntry);
     }
     set((state) => ({
       items: [
@@ -55,9 +69,10 @@ export const useAssociationStore = create<DataState>((set, get) => ({
     const updatedItems = get().items.filter(
       (data) => data.title !== item.title
     );
-    const newFileContent = updatedItems
-      .map((item) => `${item.title}\n${item.description}\n${SOH}\n`)
-      .join("");
+    let newFileContent = "Version: 1\nTitle : Description : Location\n";
+    updatedItems.forEach((item) => {
+      newFileContent += `"${item.title}" : "${item.description}"\n`;
+    });
     get().file.write(newFileContent);
     set({ items: updatedItems });
   },

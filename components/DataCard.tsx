@@ -1,15 +1,16 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
-
 import { Ionicons } from "@expo/vector-icons";
+import { Pressable, StyleSheet, View } from "react-native";
 
+import { ThemedText } from "@/components/themed-components/themed-text";
 import { DataType } from "@/model/dataType";
+import { ThemedCardView } from "./themed-components/themed-card-view";
 
 export default function DataCard(props: {
   item: DataType;
   onPress: () => void;
 }) {
   return (
-    <View style={styles.itemWrapper}>
+    <ThemedCardView style={styles.itemWrapper}>
       <Pressable
         android_ripple={{ color: "#ffffff44" }}
         style={({ pressed }) => [
@@ -18,51 +19,57 @@ export default function DataCard(props: {
         ]}
         onPress={props.onPress}
       >
-        <View>
-          <Text numberOfLines={1} ellipsizeMode="tail" style={styles.itemTitle}>
+        <View style={styles.textContainer}>
+          <ThemedText
+            numberOfLines={1}
+            ellipsizeMode="tail"
+            style={styles.itemTitle}
+          >
             {props.item.title}
-          </Text>
-          <Text
+          </ThemedText>
+          <ThemedText
             numberOfLines={2}
             ellipsizeMode="tail"
-            style={styles.itemDescription}
+            style={[styles.itemDescription, { opacity: 0.6 }]}
           >
             {props.item.description}
-          </Text>
+          </ThemedText>
         </View>
-        <Ionicons name="chevron-forward" size={18} color="#C7C7CC" />
+        <Ionicons name="chevron-forward" size={18} />
       </Pressable>
-    </View>
+    </ThemedCardView>
   );
 }
 
 const styles = StyleSheet.create({
+  itemWrapper: {
+    marginHorizontal: 16,
+    marginBottom: 12,
+    borderRadius: 14, // Slightly rounder for a more modern feel
+    overflow: "hidden",
+    // Shadows for Light Mode
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+  },
   itemContainer: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     padding: 16,
   },
+  textContainer: {
+    flex: 1,
+    marginRight: 12,
+  },
   itemTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#333",
+    fontSize: 17,
+    fontWeight: "700",
   },
   itemDescription: {
     fontSize: 14,
-    color: "#666",
     marginTop: 4,
-  },
-  itemWrapper: {
-    marginHorizontal: 16,
-    marginBottom: 12,
-    borderRadius: 12,
-    backgroundColor: "#FFFFFF",
-    overflow: "hidden",
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
   },
 });
